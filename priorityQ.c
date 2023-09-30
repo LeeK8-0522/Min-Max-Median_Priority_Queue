@@ -38,19 +38,19 @@ int delete() {
     node temp_item = heap[number_of_nodes--];//heap의 마지막 노드의 값을 저장하고 노드의 개수를 한 개 미리 줄인다.
 
     //여기서는 'parent', 'child' 변수가 pop의 insertPos 역할을 수행 (즉, 위치추적)
-    int parent = 1;//root 노드부터 시작
-    int child = 2;//root 노드의 child 노드부터 시작
+    int parentPos = 1;//root 노드부터 시작
+    int childPos = 2;//root 노드의 child 노드부터 시작
 
-    while(child <= number_of_nodes) {//child 노드가 heap 범위 내에 있을 때
-        if((child < number_of_nodes) && (heap[child].key > heap[child + 1].key)) child++;//left child와 right child의 값들 중 큰 값을 택
-        if((temp_item.key <= heap[child].key)) break;//root 노드부터 차례로 내려오다가 child 노드의 값보다 큰 순간이 오다면 parent 노드에 노드 값을 삽입하기 위해 break
+    while(childPos <= number_of_nodes) {//child 노드가 heap 범위 내에 있을 때
+        if((childPos < number_of_nodes) && (heap[childPos].key > heap[childPos + 1].key)) childPos++;//left child와 right child의 값들 중 큰 값을 택
+        if((temp_item.key <= heap[childPos].key)) break;//root 노드부터 차례로 내려오다가 child 노드의 값보다 큰 순간이 오다면 parent 노드에 노드 값을 삽입하기 위해 break
 
-        heap[parent] = heap[child];//parent 노드 값에 child 노드 값을 대입 (for switching. ex. '10 9' -> '9 9')
-        parent = child;
-        child *= 2;
+        heap[parentPos] = heap[childPos];//parent 노드 값에 child 노드 값을 대입 (for switching. ex. '10 9' -> '9 9')
+        parentPos = childPos;
+        childPos *= 2;
     }
 
-    heap[parent] = temp_item;//switching 연산이 종료되면 최종적으로 삽입할 위치에 아이템 값 대입 (ex. '10 9 8 7 6' -> '9 8 7 6 6' -> '9 8 7 6 5')
+    heap[parentPos] = temp_item;//switching 연산이 종료되면 최종적으로 삽입할 위치에 아이템 값 대입 (ex. '10 9 8 7 6' -> '9 8 7 6 6' -> '9 8 7 6 5')
 
     return pop_item.key;
 }
