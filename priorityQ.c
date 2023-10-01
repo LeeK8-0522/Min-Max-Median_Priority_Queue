@@ -16,7 +16,7 @@ void initialize(MAX_HEAP* heap) {
     heap->number_of_nodes = 0;
 }//노드의 개수 초기화
 
-void push(MAX_HEAP* heap, int item) {
+void insertNode(MAX_HEAP* heap, int item) {
     if(heap->number_of_nodes == MAX_ELEMENTS - 1) {//if heap is full,
         fprintf(stderr, "The heap is full.\n");
         exit(1);//프로그램 강제 종료
@@ -32,7 +32,7 @@ void push(MAX_HEAP* heap, int item) {
     heap->NODE[insertPos].key = item;//최종적으로 연산이 끝나면 마무리로 최종 삽입 위치에 아이템 값을 삽입. (ex. '10 9 8 7 6 5' -> '10 10 9 8 7 6' -> '11 10 9 8 7 6')
 }
 
-int delete(MAX_HEAP* heap) {
+int popNode(MAX_HEAP* heap) {
     if(!heap->number_of_nodes) {//if heap is empty,
         fprintf(stderr, "The heap is empty.\n");
         exit(1);//프로그램 강제 종료
@@ -69,19 +69,15 @@ int main() {
 
     initialize(heap);//initialize heap
 
-    int N;
-    scanf("%d", &N);
-    int temp;
-    for(int i = 0; i < N; i++) {
-        scanf("%d", &temp);
-        if(!temp) {//if temp value is 0
-            if(!heap->number_of_nodes) printf("0\n");//if heap is empty
-            else printf("%d\n", delete(heap));//pop element
-        }
-        else push(heap, temp);
-    }
+    insertNode(heap, 10);
+    insertNode(heap, 9);
+    insertNode(heap, 11);
+    insertNode(heap, 5);
+    insertNode(heap, 8);
+    insertNode(heap, 12);
 
-    free(heap);
+    int cnt = heap->number_of_nodes;
+    for(int i = 0; i < cnt; i ++) printf("%d\n", popNode(heap));
 
     return 0;
 }
