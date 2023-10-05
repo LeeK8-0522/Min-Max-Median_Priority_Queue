@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define MAX_NODES 1000010
 
@@ -21,6 +20,16 @@ void swap_node(HEAP* heap, int index1, int index2) {
 
 void initialize(HEAP* heap) {
     heap->size = 0;
+}
+
+int log2_func(int num) {
+    int cnt = 0;
+    while(num/2 > 0) {
+        cnt++;
+        num /= 2;
+    }
+
+    return cnt;
 }
 
 void heapify_down_MAX(HEAP* heap, int index);
@@ -59,7 +68,7 @@ void insert(HEAP* heap, int item) {//insert item key
     int parent_index = index / 2;//parent's index position
     heap->nodes[index].key = item;
 
-    int level = (int)log2(index);
+    int level = log2_func(index);
 
     if(index != 1) {
         if(level%2==0) {//if inserted position is in min level,
@@ -180,7 +189,7 @@ int find_max(HEAP* heap, int index) {//index 노드의 child, grand child 노드
 }
 
 void heapify_down(HEAP* heap, int index) {
-    int level = (int)log2(index);
+    int level = log2_func(index);
 
     if(level % 2 == 0) heapify_down_MIN(heap, index);
     else heapify_down_MAX(heap, index);
@@ -231,7 +240,7 @@ void heapify_down_MIN(HEAP* heap, int index) {
 int delete(HEAP* heap, int index) {
     if(heap->size == 0) return -1;
 
-    int level = (int)log2(index);
+    int level = log2_func(index);
     int deleted_key = heap->nodes[index].key;
     swap_node(heap, index, heap->size--);
 
