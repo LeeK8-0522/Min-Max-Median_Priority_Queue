@@ -5,7 +5,7 @@
 
 void heapify_down_MAX(int index);
 void heapify_down_MIN(int index);
-int findMedian_PQ();
+int seek_median();
 
 typedef struct {
     int key;
@@ -30,43 +30,44 @@ typedef struct {
 
 MIN_MAX_MEDIAN_PQ* MMMQ;//전역 변수로 설정
 
+/*
+README:
+<min-max heap>:
+삽입: void insert_MEDIAN_HEAP(int item)
+삭제: int pop_MAX_HEAP() , int pop_MIN_HEAP()
+탐색: int seek_median()
 
-
+<median heap>:
+삽입: void insert_MIN_MAX_HEAP(int item)
+삭제: int delete_MIN_MAX_HEAP(int index)
+탐색: int seek_max(), int seek_min()
+*/
 
 ////////////////////Belows are functions definitions
 
 
 
 
-void swap_node(int index1, int index2, int flag) {//0: median_heap -> min_max_heap, 1: min_max_heap -> median_heap
-    NODE* nodes = (flag) ? MMMQ->min_max_pq : MMMQ->median_pq;
-    NODE* opposite_nodes = (flag) ? MMMQ->median_pq : MMMQ->min_max_pq;
+void swap_node(HEAP* heap, int index1, int index2, int flag) {//0: median_heap -> min_max_heap, 1: min_max_heap -> median_heap
+    if(flag) {//opposite heap is median heap
+        NODE* nodes = MMMQ->min_max_pq->nodes;
+        NODE* opposite_nodes_MAX = MMMQ->median_pq->max_heap->nodes;
+        NODE* opposite_nodes_MIN = MMMQ->median_pq->min_heap->nodes;
 
-    //먼저, 상대편 heap의 node 수정
-    if(flag) {//if opposite node is in median_heap,
-        int median = findMedian_PQ(MMMQ->median_pq);
-        if(nodes[index1].key <= median && nodes[index2].key <= median) {//둘 다 max heap
-            
-        }
-        else if(nodes[index1].key <= median && nodes[index2].key > median) {//max heap, min heap
 
-        }
-        else if(nodes[index1].key > median && nodes[index2].key <= median) {//min heap, max heap
+    }
+    else {//opposite heap is min-max heap
+        NODE* nodes_MAX = MMMQ->median_pq->max_heap;
+        NODE* nodes_MIN = MMMQ->median_pq->min_heap;
+        NODE* opposite_nodes = MMMQ->min_max_pq->nodes;
 
-        }
-        else {//둘 다 min heap
 
-        }
-    }   
-    else {//if opposite node is in min_max_heap,
-        opposite_nodes[nodes[index1].syncPos].syncPos = index2;
-        opposite_nodes[nodes[index2].syncPos].syncPos = index1;
     }
 
     //내부 heap의 node 수정
-    NODE temp = nodes[index1];
-    nodes[index1] = nodes[index2];
-    nodes[index2] = temp;
+    NODE temp = heap->nodes[index1];
+    heap->nodes[index1] = heap->nodes[index2];
+    heap->nodes[index2] = temp;
 }
 
 void initialize() {
@@ -128,7 +129,7 @@ void heapify_up_MIN(int index) {
     }
 } 
 
-void insert_MIN_MAX(int item) {//insert item key
+void insert_MIN_MAX_HEAP(int item) {//insert item key
     HEAP* heap = MMMQ->min_max_pq;
     int index = ++heap->size;//우선 맨 마직막 위치에 노드를 저장
     int parent_index = index / 2;
@@ -310,7 +311,7 @@ void heapify_down_MIN(int index) {
     }
 }
 
-int delete_MIN_MAX(int index) {//index 노드 삭제 연산
+int delete_MIN_MAX_HEAP(int index) {//index 노드 삭제 연산
     HEAP* heap = MMMQ->min_max_pq;
 
     if(heap->size == 0) return -1;
@@ -354,13 +355,13 @@ int foo() {
     return 0;
 }//return node index having max key value
 
-int seekMIN() {
+int seek_min() {
     HEAP* heap = MMMQ->min_max_pq;
 
     return heap->nodes[1].key;
 }//seek min key value
 
-int seekMAX() {
+int seek_max() {
     HEAP* heap = MMMQ->min_max_pq;
 
     if(heap->size == 1) return heap->nodes[1].key;
@@ -375,7 +376,7 @@ int seekMAX() {
 
 
 
-void insertNode_MAX_HEAP(int item) {
+void insert_MAX_HEAP(int item) {
     HEAP* heap = MMMQ->median_pq->max_heap;
 
     if(heap->size == MAX_NODES - 1) {//if heap is full,
@@ -392,7 +393,7 @@ void insertNode_MAX_HEAP(int item) {
     }
 }
 
-int popNode_MAX_HEAP() {//upper level -> lower level
+int pop_MAX_HEAP() {//upper level -> lower level
     HEAP* heap = MMMQ->median_pq->max_heap;
 
     if(!heap->size) {//if heap is empty,
@@ -418,7 +419,7 @@ int popNode_MAX_HEAP() {//upper level -> lower level
     return pop_item;
 }
 
-void insertNode_MIN_HEAP(int item) {//lower level -> upper level
+void insert_MIN_HEAP(int item) {//lower level -> upper level
     HEAP* heap = MMMQ->median_pq->min_heap;
 
     if(heap->size == MAX_NODES - 1) {//if heap is full,
@@ -435,7 +436,7 @@ void insertNode_MIN_HEAP(int item) {//lower level -> upper level
     }
 }
 
-int popNode_MIN_HEAP() {
+int pop_MIN_HEAP() {
     HEAP* heap = MMMQ->median_pq->min_heap;
 
     if(!heap->size) {//if heap is empty,
@@ -462,7 +463,7 @@ int popNode_MIN_HEAP() {
 }
 
 
-void insertNode_PQ(int item) {//중요!: 최대 힙의 노드 개수가 최소 힙의 노드 개수와 같거나 1개 더 많도록 유지해야 한다.
+void insert_MEDIAN_HEAP(int item) {//중요!: 최대 힙의 노드 개수가 최소 힙의 노드 개수와 같거나 1개 더 많도록 유지해야 한다.
     HEAP* max_heap = MMMQ->median_pq->max_heap;
     HEAP* min_heap = MMMQ->median_pq->min_heap;
 
@@ -493,7 +494,21 @@ void insertNode_PQ(int item) {//중요!: 최대 힙의 노드 개수가 최소 �
     }
 }//insert node with item 
 
-int findMedian_PQ() {
+int delete_MAX_HEAP(int index) {
+    HEAP* heap = MMMQ->median_pq->max_heap;
+    int pop_item = heap->nodes[index].key;
+
+    if() {
+
+    }
+    else {
+
+    }
+
+    return pop_item;
+}
+
+int seek_median() {
     MEDIAN_PQ* median_pq = MMMQ->median_pq;
 
     int total_size = median_pq->max_heap->size + median_pq->min_heap->size;//총 노드의 개수
