@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <math.h>
 
 #define MAX_NODES 1000010
 
@@ -13,77 +12,89 @@ typedef struct {
     int size;
 } HEAP;
 
-void swap_node(HEAP* heap, int index1, int index2) {
-    NODE temp = heap->nodes[index1];
-    heap->nodes[index1] = heap->nodes[index2];
-    heap->nodes[index2] = temp;
+HEAP* min_max_pq;//전역변수로 설정
+
+int log2_func(int num) {//log function (시간 복잡도: O(lg num) -> 이 코드에서는 주로 O(lg(lgn)))
+    int cnt = 0;
+    while(num/2 > 0) {
+        cnt++;
+        num /= 2;
+    }
+
+    return cnt;
 }
 
-void initialize(HEAP* heap) {
-    heap->size = 0;
+void swap_node(int index1, int index2) {
+    NODE temp = min_max_pq->nodes[index1];
+    min_max_pq->nodes[index1] = min_max_pq->nodes[index2];
+    min_max_pq->nodes[index2] = temp;
 }
 
-void heapify_down_MAX(HEAP* heap, int index);
-void heapify_down_MIN(HEAP* heap, int index);
+void initialize() {
+    min_max_pq->size = 0;
+}//init min-max heap
 
-//max-level끼리만 비교 (단, index를 제외한 나머지 전체 노드들은 서로서로 heap 성질 만족 -> 사용이 의미 O)
-void heapify_up_MAX(HEAP* heap, int index) { 
+void heapify_up_MIN_MAX_HEAP(int index) {
+    HEAP* heap = min_max_pq;
+    
+    int level = log2_func(index);
     int grand_index = index/4;
     
-    while(grand_index > 0) {//while having a grand parent
-        if(heap->nodes[index].key > heap->nodes[grand_index].key) {
-            swap_node(heap, index, grand_index);
-            index = grand_index;
-            grand_index = index/4;
+    if(level % 2 == 0) {//min-level끼리만 비교 (단, index를 제외한 나머지 전체 노드들은 서로서로 heap 성질 만족 -> 사용이 의미 O)
+        while(grand_index > 0) {//while having a grand parent
+            if(heap->nodes[index].key < heap->nodes[grand_index].key) {//swap child node with grand parent node until condition breaks
+                swap_node(index, grand_index);
+                index = grand_index;
+                grand_index = index/4;
+            }
+            else break;
         }
-        else break;
     }
-}   
-
-//min-level끼리만 비교 (단, index를 제외한 나머지 전체 노드들은 서로서로 heap 성질 만족 -> 사용이 의미 O)
-void heapify_up_MIN(HEAP* heap, int index) {
-    int grand_index = index/4;
-    
-    while(grand_index > 0) {//while having a grand parent
-        if(heap->nodes[index].key < heap->nodes[grand_index].key) {
-            swap_node(heap, index, grand_index);
-            index = grand_index;
-            grand_index = index/4;
+    else {//max-level끼리만 비교 (단, index를 제외한 나머지 전체 노드들은 서로서로 heap 성질 만족 -> 사용이 의미 O)
+        while(grand_index > 0) {//while having a grand parent
+            if(heap->nodes[index].key > heap->nodes[grand_index].key) {//swap child node with grand parent node until condition breaks
+                swap_node(index, grand_index);
+                index = grand_index;
+                grand_index = index/4;
+            }
+            else break;
         }
-        else break;
     }
-} 
+}
 
-void insert(HEAP* heap, int item) {//insert item key
-    int index = ++heap->size;//inserted position
-    int parent_index = index / 2;//parent's index position
+void insert_MIN_MAX_HEAP(int item) {//insert item key
+    HEAP* heap = min_max_pq;
+    int index = ++heap->size;//우선 맨 마직막 위치에 노드를 저장
+    int parent_index = index / 2;
     heap->nodes[index].key = item;
 
-    int level = (int)log2(index);
+    int level = log2_func(index);
 
-    if(index != 1) {
+    if(index != 1) {//index가 root를 가리키지 않을 때까지
         if(level%2==0) {//if inserted position is in min level,
             if(heap->nodes[index].key > heap->nodes[parent_index].key) {//해당 node가 max-level에 있어야 하는지, min-level에 있어야 하는지 판단 (동시에 index를 제외한 나머지 노드들은 서로서로 heap 성질 만족 O)
-                swap_node(heap, index, parent_index);
-                heapify_up_MAX(heap, parent_index);//heapify upper heaps
+                swap_node(index, parent_index);
+                heapify_up_MIN_MAX_HEAP(parent_index);//heapify upper heaps
             }
             else {
-                heapify_up_MIN(heap, index);//heapify upper heaps
+                heapify_up_MIN_MAX_HEAP(index);//heapify upper heaps
             }
         }
         else {//if inserted position is in max level,
             if(heap->nodes[index].key < heap->nodes[parent_index].key) {//해당 node가 max-level에 있어야 하는지, min-level에 있어야 하는지 판단(동시에 index를 제외한 나머지 노드들은 서로서로 heap 성질 만족 O)
-                swap_node(heap, index, parent_index);
-                heapify_up_MIN(heap, parent_index);//heapify upper heaps
+                swap_node(index, parent_index);
+                heapify_up_MIN_MAX_HEAP(parent_index);//heapify upper heaps
             }
             else {
-                heapify_up_MAX(heap, index);//heapify upper heaps
+                heapify_up_MIN_MAX_HEAP(index);//heapify upper heaps
             }
         }
     }
 }
 
-int find_min(HEAP* heap, int index) {//index 노드의 child, grand child 노드들 중에서 최솟인 인덱스 반환
+int find_min_child(int index) {//index 노드의 child, grand child 노드들 중에서 최솟인 인덱스 반환
+    HEAP* heap = min_max_pq;
+
     int min_key;
     int min_index = -1;
     int size = heap->size;
@@ -129,9 +140,11 @@ int find_min(HEAP* heap, int index) {//index 노드의 child, grand child 노드
     }
 
     return min_index;
-}
+}//메모리에의 잘못된 접근을 피하기 위해 모두 case 분류
 
-int find_max(HEAP* heap, int index) {//index 노드의 child, grand child 노드들 중에서 최대인 인덱스 반환
+int find_max_child(int index) {//index 노드의 child, grand child 노드들 중에서 최대인 인덱스 반환
+    HEAP* heap = min_max_pq;
+    
     int max_key;
     int max_index = -1;
     int size = heap->size;
@@ -177,86 +190,109 @@ int find_max(HEAP* heap, int index) {//index 노드의 child, grand child 노드
     }
 
     return max_index;
-}
+}//메모리에의 잘못된 접근을 피하기 위해 모두 case 분류
 
-void heapify_down(HEAP* heap, int index) {
-    int level = (int)log2(index);
-
-    if(level % 2 == 0) heapify_down_MIN(heap, index);
-    else heapify_down_MAX(heap, index);
-}
 
 //(단, index 노드의 두 child node를 root 노드로 하는 두 heap은 모두 이미 heapify 완료 O) 
-void heapify_down_MAX(HEAP* heap, int index) {
+void heapify_down_MIN_MAX_HEAP(int index) {//heapify down for min-level && max-level
+    HEAP* heap = min_max_pq;
     int child_index = index * 2;
+    int level = log2_func(index);
 
     if(child_index <= heap->size) {
-        int max_index = find_max(heap, index);
+        if(level % 2 == 0) {
+            int min_index = find_min_child(index);
 
-        if(max_index >= 4 * index && max_index <= 4 * index + 3) {//if max_index is in grand child 
-            if(heap->nodes[max_index].key > heap->nodes[index].key) {
-                swap_node(heap, index, max_index);
-                if(heap->nodes[max_index].key < heap->nodes[max_index/2].key) swap_node(heap, max_index, max_index/2);
+            if(min_index >= 4 * index && min_index <= 4 * index + 3) {//if min_index is in grand child 
+                if(heap->nodes[min_index].key < heap->nodes[index].key) {
+                    swap_node(index, min_index);//swap with max value node
+                    if(heap->nodes[min_index].key > heap->nodes[min_index/2].key) swap_node(min_index, min_index/2);//if condition satified, swap with its parent node
 
-                heapify_down(heap, max_index);
+                    heapify_down_MIN_MAX_HEAP(min_index);
+                }
+            }   
+            else if(heap->nodes[min_index].key < heap->nodes[index].key) {//if max_index is in child and smaller than its parent key
+                swap_node(index, min_index);//swap with max value node
             }
-        }   
-        else if(heap->nodes[max_index].key > heap->nodes[index].key) {//if max_index is in child and smaller than its parent key
-            swap_node(heap, index, max_index);
         }
-    }
-}  
+        else {
+            int max_index = find_max_child(index);
 
-//(단, index 노드의 두 child node를 root 노드로 하는 두 heap은 모두 이미 heapify 완료 O) 
-void heapify_down_MIN(HEAP* heap, int index) {
-    int child_index = index * 2;
+            if(max_index >= 4 * index && max_index <= 4 * index + 3) {//if max_index is in grand child 
+                if(heap->nodes[max_index].key > heap->nodes[index].key) {
+                    swap_node(index, max_index);//swap with max value node
+                    if(heap->nodes[max_index].key < heap->nodes[max_index/2].key) swap_node(max_index, max_index/2);//if condition statified, swap with its parent node
 
-    if(child_index <= heap->size) {
-        int min_index = find_min(heap, index);
-
-        if(min_index >= 4 * index && min_index <= 4 * index + 3) {//if min_index is in grand child 
-            if(heap->nodes[min_index].key < heap->nodes[index].key) {
-                swap_node(heap, index, min_index);
-                if(heap->nodes[min_index].key > heap->nodes[min_index/2].key) swap_node(heap, min_index, min_index/2);
-
-                heapify_down(heap, min_index);
+                    heapify_down_MIN_MAX_HEAP(max_index);
+                }
+            }   
+            else if(heap->nodes[max_index].key > heap->nodes[index].key) {//if max_index is in child and smaller than its parent key
+                swap_node(index, max_index);//swap with max value node
             }
-        }   
-        else if(heap->nodes[min_index].key < heap->nodes[index].key) {//if max_index is in child and smaller than its parent key
-            swap_node(heap, index, min_index);
         }
     }
 }
 
-int delete(HEAP* heap, int index) {
+int delete_MIN_MAX_HEAP(int index) {//index 노드 삭제 연산
+    HEAP* heap = min_max_pq;
+
     if(heap->size == 0) return -1;
 
-    int level = (int)log2(index);
+    int level = log2_func(index);
     int deleted_key = heap->nodes[index].key;
-    swap_node(heap, index, heap->size--);
+    swap_node(index, heap->size--);//index 노드와 마지막 노드와 swap
 
-    heapify_down(heap, index);
+    heapify_down_MIN_MAX_HEAP(index);//index 노드를 root 노드로 하는 sub heap을 heapify
+    
+    //index 노드 upper level에 대한 heapify
+    if(level%2==0) {//for min_level
+        while(index/4 > 0) {//while having grand parent
+            if(heap->nodes[index].key < heap->nodes[index/4].key) {
+                swap_node(index, index/4);//swap with grand parent node
+                index /= 4;
+            }
+            else break;
+        } 
+    }
+    else {//for max_level,
+        while(index/4 > 0) {//while having grand parent
+            if(heap->nodes[index].key > heap->nodes[index/4].key) {
+                swap_node(index, index/4);//swap with grand parent node
+                index /= 4;
+            }
+            else break;
+        } 
+    }
 
     return deleted_key;
 }
 
-int foo(HEAP* heap) {
+int foo() {
+    HEAP* heap = min_max_pq;
+
     if(heap->size == 1) return 1;
     else if(heap->size == 2) return 2;
     else return (heap->nodes[2].key > heap->nodes[3].key) ? 2 : 3;
 
     return 0;
-}
+}//return node index having max key value
 
-int seekMIN(HEAP* heap) {
+int seek_min() {
+    HEAP* heap = min_max_pq;
+
     return heap->nodes[1].key;
-}
+}//seek min key value
 
-int seekMAX(HEAP* heap) {
+int seek_max() {
+    HEAP* heap = min_max_pq;
+
     if(heap->size == 1) return heap->nodes[1].key;
     else if(heap->size == 2) return heap->nodes[2].key;
     else return (heap->nodes[2].key > heap->nodes[3].key) ? heap->nodes[2].key : heap->nodes[3].key;
-}
+}//seek max key value
+
+////////////////////finish implementing min-max priority queue.
+
 
 int main() {
     int T;
@@ -269,23 +305,24 @@ int main() {
         scanf("%d", &k);
         getchar();
 
-        HEAP* heap = (HEAP*)malloc(sizeof(HEAP));
-        initialize(heap);
+        min_max_pq = (HEAP*)malloc(sizeof(HEAP));
+        initialize(min_max_pq);
         for(int i = 0; i < k; i++) {
             scanf("%c %d", &instruction, &n);
             getchar();
 
-            if(instruction == 'I') insert(heap, n);
+            if(instruction == 'I') insert_MIN_MAX_HEAP(n);
             else {
-                if(n == 1) delete(heap, foo(heap));
-                else delete(heap, 1);
+                if(n == 1) delete_MIN_MAX_HEAP(foo(min_max_pq));
+                else delete_MIN_MAX_HEAP(1);
             }
         }
 
-        if(heap->size == 0) printf("EMPTY\n");
-        else printf("%d %d\n", seekMAX(heap), seekMIN(heap));
+        if(min_max_pq->size == 0) printf("EMPTY\n");
+        else printf("%d %d\n", seek_max(), seek_min());
+
+        free(min_max_pq);
     }
 
     return 0;
 }
-
