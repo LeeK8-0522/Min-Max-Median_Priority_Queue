@@ -49,6 +49,7 @@ void insert_MAX_HEAP(int item);
 NODE delete_MAX_HEAP(int index);
 void insert_MIN_HEAP(int item);
 NODE delete_MIN_HEAP(int index);
+void balance_MEDIAN_HEAP();
 void insert_MEDIAN_HEAP(int item);
 int find_median();
 //finish declaring functions
@@ -468,6 +469,24 @@ NODE delete_MIN_HEAP(int index) {
     return heap->nodes[heap->size + 1];//return deleted node info
 }
 
+void balance_MEDIAN_HEAP() {//max heap의 노드 개수와 min heap의 노드 개수사이의 균형 맞추기
+    HEAP* max_heap = MMMQ->median_pq->max_heap;
+    HEAP* min_heap = MMMQ->median_pq->min_heap;
+
+    if(max_heap->size >= min_heap->size + 2) {//최대 힙의 노드 개수가 최소 힙의 노드 개수보다 2개이상 많을 때,
+        NODE temp = delete_MAX_HEAP(1);//최대 힙의 루트 노드를 pop
+        delete_MIN_MAX_HEAP(temp.syncPos);
+        insert_MIN_HEAP(temp.key);//pop한 루트 노드를 최소 힙에 삽입
+        insert_MIN_MAX_HEAP(temp.key);
+    } 
+    else if(max_heap->size < min_heap->size) {//최소 힙의 노드 개수가 최대 힙의 노드 개수보다 많을 때,
+        NODE temp = delete_MIN_HEAP(1);//최소 힙에서 루트 노드 pop
+        delete_MIN_MAX_HEAP(temp.syncPos);
+        insert_MAX_HEAP(temp.key);//pop한 노드를 최대 힙에 삽입
+        insert_MIN_MAX_HEAP(temp.key);
+    }
+}
+
 void insert_MEDIAN_HEAP(int item) {//중요!: 최대 힙의 노드 개수가 최소 힙의 노드 개수와 같거나 1개 더 많도록 유지해야 한다.
     HEAP* max_heap = MMMQ->median_pq->max_heap;
     HEAP* min_heap = MMMQ->median_pq->min_heap;
@@ -481,10 +500,8 @@ void insert_MEDIAN_HEAP(int item) {//중요!: 최대 힙의 노드 개수가 최
         if(item >  median) {
             insert_MIN_HEAP(item);//최소 힙에 삽입
             insert_MIN_MAX_HEAP(item);
-            NODE temp = delete_MIN_HEAP(1);//최소 힙에서 루트 노드 pop
-            delete_MIN_MAX_HEAP(temp.syncPos);
-            insert_MAX_HEAP(temp.key);//pop한 노드를 최대 힙에 삽입
-            insert_MIN_MAX_HEAP(temp.key);      
+
+            balance_MEDIAN_HEAP();//balance median heap
         }
         else {
             insert_MAX_HEAP(item);//최대 힙에 삽입
@@ -500,10 +517,8 @@ void insert_MEDIAN_HEAP(int item) {//중요!: 최대 힙의 노드 개수가 최
         else {
             insert_MAX_HEAP(item);//최대 힙에 삽입
             insert_MIN_MAX_HEAP(item);
-            NODE temp = delete_MAX_HEAP(1);//최대 힙의 루트 노드를 pop
-            delete_MIN_MAX_HEAP(temp.syncPos);
-            insert_MIN_HEAP(temp.key);//pop한 루트 노드를 최소 힙에 삽입
-            insert_MIN_MAX_HEAP(temp.key);
+            
+            balance_MEDIAN_HEAP();//balance median heap
         }
     }
 }//insert node with item 
@@ -512,14 +527,14 @@ int find_median() {
     MEDIAN_PQ* median_pq = MMMQ->median_pq;
 
     int total_size = median_pq->max_heap->size + median_pq->min_heap->size;//총 노드의 개수
-    if(!total_size) return 0;//노드의 개수가 0개일 때
+    if(!total_size) return -1;//노드의 개수가 0개일 때
     else return median_pq->max_heap->nodes[1].key;
 }//return median value but don't remove it 
 
 ////////////////////finish implementing median heap
 
 void insert(int element) {
-    insert_MEDIAN_HEAP(element);
+    insert_MEDIAN_HEAP(element);//insert median heap 함수가 insert min-max heap 함수의 기능을 포함
 }
 
 int delete_min() {
@@ -531,21 +546,13 @@ int delete_min() {
     NODE deleted_node = delete_MIN_MAX_HEAP(1);
     if(deleted_node.key > find_median()) {
         delete_MIN_HEAP(deleted_node.syncPos);
-        if(max_heap->size >= min_heap->size + 2) {//최대 힙의 노드 개수가 최소 힙의 노드 개수보다 2이상 클 때,
-            NODE temp = delete_MAX_HEAP(1);//최대 힙에서 루트 노드 pop
-            delete_MIN_MAX_HEAP(temp.syncPos);
-            insert_MIN_HEAP(temp.key);//pop한 노드를 최소 힙에 삽입
-            insert_MIN_MAX_HEAP(temp.key);    
-        }
+        
+        balance_MEDIAN_HEAP();//balance median heap
     }
     else {
         delete_MAX_HEAP(deleted_node.syncPos);
-        if(max_heap->size < min_heap->size) {
-            NODE temp = delete_MIN_HEAP(1);//최소 힙에서 루트 노드 pop
-            delete_MIN_MAX_HEAP(temp.syncPos);
-            insert_MAX_HEAP(temp.key);//pop한 노드를 최대 힙에 삽입
-            insert_MIN_MAX_HEAP(temp.key);    
-        }
+        
+        balance_MEDIAN_HEAP();//balance median heap
     }
 }
 
@@ -555,9 +562,13 @@ int delete_max() {
     NODE deleted_node = delete_MIN_MAX_HEAP(foo());
     if(deleted_node.key > find_median()) {
         delete_MIN_HEAP(deleted_node.syncPos);
+
+        balance_MEDIAN_HEAP();//balance median heap
     }
     else {
         delete_MAX_HEAP(deleted_node.syncPos);
+
+        balance_MEDIAN_HEAP();//balance median heap
     }
 }
 
@@ -566,6 +577,8 @@ int delete_median() {
 
     NODE deleted_node = delete_MAX_HEAP(1);
     delete_MIN_MAX_HEAP(deleted_node.syncPos);
+
+    balance_MEDIAN_HEAP();//balance median heap
 }
 
 int main() {
@@ -581,6 +594,8 @@ int main() {
     delete_max();
     delete_median();
     insert(1);
+    delete_max();
+    delete_max();
     delete_max();
     delete_max();
 
