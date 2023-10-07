@@ -349,11 +349,15 @@ int foo() {
 int find_min() {
     HEAP* heap = MMMQ->min_max_pq;
 
+    if(!heap->size) return -1;
+
     return heap->nodes[1].key;
 }//seek min key value
 
 int find_max() {
     HEAP* heap = MMMQ->min_max_pq;
+
+    if(!heap->size) return -1;
 
     if(heap->size == 1) return heap->nodes[1].key;
     else if(heap->size == 2) return heap->nodes[2].key;
@@ -546,7 +550,7 @@ int delete_min() {
 }
 
 int delete_max() {
-    if(!MMMQ->median_pq->max_heap->size) return -1;
+    if(!MMMQ->min_max_pq->size) return -1;
 
     NODE deleted_node = delete_MIN_MAX_HEAP(foo());
     if(deleted_node.key > find_median()) {
@@ -558,7 +562,7 @@ int delete_max() {
 }
 
 int delete_median() {
-    if(!MMMQ->median_pq->max_heap->size) return -1;
+    if(!MMMQ->min_max_pq->size) return -1;
 
     NODE deleted_node = delete_MAX_HEAP(1);
     delete_MIN_MAX_HEAP(deleted_node.syncPos);
@@ -572,6 +576,14 @@ int main() {
     insert(20);
     insert(15);
     delete_min();
+    insert(30);
+    insert(9);
+    delete_max();
+    delete_median();
+    insert(1);
+    delete_max();
+    delete_max();
+
     printf("%d\n", find_min());
     printf("%d\n", find_max());
     printf("%d\n", find_median());
