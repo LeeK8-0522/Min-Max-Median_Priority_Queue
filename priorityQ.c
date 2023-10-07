@@ -52,9 +52,11 @@ NODE delete_MIN_HEAP(int index);
 void balance_MEDIAN_HEAP();
 void insert_MEDIAN_HEAP(int item);
 int find_median();
+void insert(int element);
+int delete_max();
+int delete_min();
+int delete_median();
 //finish declaring functions
-
-
 
 
 
@@ -584,24 +586,7 @@ int delete_median() {
 int main() {
     initialize();
 
-    insert(5);
-    insert(10);
-    insert(20);
-    insert(15);
-    delete_min();
-    insert(30);
-    insert(9);
-    delete_max();
-    delete_median();
-    insert(1);
-    delete_max();
-    delete_max();
-    delete_max();
-    delete_max();
-
-    printf("%d\n", find_min());
-    printf("%d\n", find_max());
-    printf("%d\n", find_median());
+    
     
     destroy();
 
