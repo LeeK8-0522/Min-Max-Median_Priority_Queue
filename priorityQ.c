@@ -583,6 +583,7 @@ int delete_median() {
     balance_MEDIAN_HEAP();//balance median heap
 }
 
+/*
 int main() {
     initialize();
 
@@ -629,27 +630,33 @@ int main() {
 
     return 0;
 }
-
-/*
-int main() {
-    initialize();
-
-    insert(5);
-    insert(10);
-    insert(7);
-    insert(12);
-    insert(1);
-    insert(2);
-    insert(30);
-    insert(20);
-    insert(6);
-    insert(22);
-    insert(40);
-    
-    delete_min();
-
-    printf("%d\n", find_min());
-
-    destroy();
-}
 */
+
+int main() {
+    int N, n;
+    int temp;
+    scanf("%d", &N);
+    for(int i = 0; i < N; i++) {
+        scanf("%d", &n);
+        initialize();
+        //우선순위 큐 초기화
+        printf("%d\n", (int)(n+1)/2);//중앙값 개수 출력
+        int cnt = 0;//출력한 횟수
+        for(int j = 1; j <= n; j++) {
+            scanf("%d", &temp);
+            insert(temp);
+            if(j%2==1) {
+                printf("%d ", find_median());
+                cnt++;
+
+                if(cnt % 10 == 0) printf("\n");//<-이 부분 주의!
+            }
+        }
+
+        if(cnt % 10 != 0) printf("\n");
+
+        destroy();
+    }  
+
+    return 0;
+}
