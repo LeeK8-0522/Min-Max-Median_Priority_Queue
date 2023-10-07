@@ -603,24 +603,24 @@ int main() {
         }   
         else if(str[0] == 'D') {
             if(str[2] == 'M') delete_min();
-            else if(str[2] == 'X') delete_min();
+            else if(str[2] == 'X') delete_max();
             else delete_median();
         }
         else {
             if(str[2] == 'M') {
-                int deleted_key = find_min();
-                if(deleted_key == -1) printf("EMPTY\n");
-                else printf("%d\n", deleted_key);
+                int key = find_min();
+                if(key == -1) printf("EMPTY\n");
+                else printf("%d\n", key);
             }
             else if(str[2] == 'X') {
-                int deleted_key = find_max();
-                if(deleted_key == -1) printf("EMPTY\n");
-                else printf("%d\n", deleted_key);
+                int key = find_max();
+                if(key == -1) printf("EMPTY\n");
+                else printf("%d\n", key);
             }
             else {  
-                int deleted_key = find_median();
-                if(deleted_key == -1) printf("EMPTY\n");
-                else printf("%d\n", deleted_key);
+                int key = find_median();
+                if(key == -1) printf("EMPTY\n");
+                else printf("%d\n", key);
             }
         }
     }
@@ -629,3 +629,27 @@ int main() {
 
     return 0;
 }
+
+/*
+int main() {
+    initialize();
+
+    insert(5);
+    insert(10);
+    insert(7);
+    insert(12);
+    insert(1);
+    insert(2);
+    insert(30);
+    insert(20);
+    insert(6);
+    insert(22);
+    insert(40);
+    
+    delete_min();
+
+    printf("%d\n", find_min());
+
+    destroy();
+}
+*/
