@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_NODES 500100
+#define MAX_NODES 7
 
 typedef struct {
     int key;
@@ -415,17 +415,15 @@ void heapifty_up_MIN_HEAP(int index) {
 void insert_MAX_HEAP(int item) {
     HEAP* heap = MMMQ->median_pq->max_heap;
 
-    if(heap->size == MAX_NODES - 1) {//if heap is full,
-        fprintf(stderr, "The heap is full.\n");
-        exit(1);//프로그램 강제 종료
-    }
-
     int insertPos = ++heap->size;//노드 개수를 미리 한 개 늘리고 그 노드의 위치를 insertPos에 저장
     heap->nodes[insertPos].key = item;
 
     //상대편 node 초기화
     MMMQ->min_max_pq->nodes[MMMQ->min_max_pq->size + 1].opposite_heap = MMMQ->median_pq->max_heap;
     MMMQ->min_max_pq->nodes[MMMQ->min_max_pq->size + 1].syncPos = insertPos;
+    //자신의 node 초기화
+    heap->nodes[insertPos].opposite_heap = MMMQ->min_max_pq;
+    heap->nodes[insertPos].syncPos = MMMQ->min_max_pq->size + 1;
 
     heapifty_up_MAX_HEAP(insertPos);
 }
@@ -442,13 +440,16 @@ NODE delete_MAX_HEAP(int index) {
 
 void insert_MIN_HEAP(int item) {
     HEAP* heap = MMMQ->median_pq->min_heap;
-    
+
     int insertPos = ++heap->size;//노드 개수를 미리 한 개 늘리고 그 노드의 위치를 insertPos에 저장
     heap->nodes[insertPos].key = item;
 
     //상대편 node 초기화
     MMMQ->min_max_pq->nodes[MMMQ->min_max_pq->size + 1].opposite_heap = MMMQ->median_pq->min_heap;
     MMMQ->min_max_pq->nodes[MMMQ->min_max_pq->size + 1].syncPos = insertPos;
+    //자신의 node 초기화
+    heap->nodes[insertPos].opposite_heap = MMMQ->min_max_pq;
+    heap->nodes[insertPos].syncPos = MMMQ->min_max_pq->size + 1;
 
     heapifty_up_MIN_HEAP(insertPos);
 }
@@ -467,12 +468,12 @@ void insert_MEDIAN_HEAP(int item) {//중요!: 최대 힙의 노드 개수가 최
     HEAP* max_heap = MMMQ->median_pq->max_heap;
     HEAP* min_heap = MMMQ->median_pq->min_heap;
 
-    if(!max_heap->size&&!min_heap->size) {//if pq is empty,
+    if(max_heap->size == 0) {//if pq is empty,
         insert_MAX_HEAP(item);
         insert_MIN_MAX_HEAP(item);
     }
     else if(max_heap->size == min_heap->size) {//최대 힙의 노드 개수와 최소 힙의 노드 개수가 같을 때
-        float median = (max_heap->nodes[1].key + min_heap->nodes[1].key)/2;//이전 중앙값 (총 노드의 개수가 짝수이므로 평균값이 중앙값)
+        float median = max_heap->nodes[1].key;//이전 중앙값
         if(item >  median) {
             insert_MIN_HEAP(item);//최소 힙에 삽입
             insert_MIN_MAX_HEAP(item);
@@ -551,43 +552,14 @@ int delete_median() {
 int main() {
     initialize();
 
-    int T;
-    scanf("%d", &T);
-    getchar();
-
-    char str[100];
-    char instruction;
-    int n;
-    for(int i = 0; i < T; i++) {
-        fgets(str, sizeof(str), stdin);
-        int len = strlen(str) - 1;//마지막 문자는 개행 문자이므로
-        
-        if(str[len-1] == 'M') {
-            if(str[0] == 'D') delete_min();
-            else {
-                if(!MMMQ->min_max_pq->size) printf("NULL\n");
-                else printf("%d\n", find_min());
-            }
-        }
-        else if(str[len-1] == 'X') {
-            if(str[0] == 'D') delete_max();
-            else {
-                if(!MMMQ->min_max_pq->size) printf("NULL\n");
-                else printf("%d\n", find_max());
-            }
-        }
-        else if(str[len-1] == 'E') {
-            if(str[0] == 'D') delete_median();
-            else {
-                if(!MMMQ->min_max_pq->size) printf("NULL\n");
-                else printf("%d\n", find_median());
-            }
-        }
-        else {
-            sscanf(str, "%c %d", &instruction, &n);
-            insert(n);
-        }
-    }
+    insert(5);
+    insert(10);
+    insert(20);
+    insert(15);
+    delete_min();
+    printf("%d\n", find_min());
+    printf("%d\n", find_max());
+    printf("%d\n", find_median());
     
     destroy();
 
