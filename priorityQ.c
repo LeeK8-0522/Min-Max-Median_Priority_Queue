@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define MAX_NODES 7
+#define MAX_NODES 500100
 
 typedef struct {
     int key;
@@ -586,7 +586,44 @@ int delete_median() {
 int main() {
     initialize();
 
-    
+    int T;
+    scanf("%d", &T);
+    getchar();
+
+    char str[20];
+    int len;//for storing length of instruction
+    char instruction;
+    int n;
+    for(int i = 0; i < T; i++) {
+        fgets(str, sizeof(str), stdin);
+        len = strlen(str) - 1;
+        if(str[0] == 'I') {
+            sscanf(str, "%c %d", &instruction, &n);
+            insert(n);
+        }   
+        else if(str[0] == 'D') {
+            if(str[2] == 'M') delete_min();
+            else if(str[2] == 'X') delete_min();
+            else delete_median();
+        }
+        else {
+            if(str[2] == 'M') {
+                int deleted_key = find_min();
+                if(deleted_key == -1) printf("EMPTY\n");
+                else printf("%d\n", deleted_key);
+            }
+            else if(str[2] == 'X') {
+                int deleted_key = find_max();
+                if(deleted_key == -1) printf("EMPTY\n");
+                else printf("%d\n", deleted_key);
+            }
+            else {  
+                int deleted_key = find_median();
+                if(deleted_key == -1) printf("EMPTY\n");
+                else printf("%d\n", deleted_key);
+            }
+        }
+    }
     
     destroy();
 
