@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define MAX_NODES 1000010
+#define MAX_NODES 500100
 
 typedef struct {
     int key;
@@ -306,8 +307,6 @@ void heapify_down_MIN_MAX_HEAP(int index) {//heapify down for min-level && max-l
 NODE delete_MIN_MAX_HEAP(int index) {//index 노드 삭제 연산
     HEAP* heap = MMMQ->min_max_pq;
 
-    if(heap->size == 0) return;
-
     int level = log2_func(index);
 
     swap_node(heap, index, heap->size--);//index 노드와 마지막 노드와 swap
@@ -443,12 +442,7 @@ NODE delete_MAX_HEAP(int index) {
 
 void insert_MIN_HEAP(int item) {
     HEAP* heap = MMMQ->median_pq->min_heap;
-
-    if(heap->size == MAX_NODES - 1) {//if heap is full,
-        fprintf(stderr, "The heap is full.\n");
-        exit(1);//프로그램 강제 종료
-    }
-
+    
     int insertPos = ++heap->size;//노드 개수를 미리 한 개 늘리고 그 노드의 위치를 insertPos에 저장
     heap->nodes[insertPos].key = item;
 
@@ -524,6 +518,8 @@ void insert(int element) {
 }
 
 int delete_min() {
+    if(!MMMQ->median_pq->max_heap->size) return -1;
+
     NODE deleted_node = delete_MIN_MAX_HEAP(1);
     if(deleted_node.key > find_median()) {
         delete_MIN_HEAP(deleted_node.syncPos);
@@ -534,6 +530,8 @@ int delete_min() {
 }
 
 int delete_max() {
+    if(!MMMQ->median_pq->max_heap->size) return -1;
+
     NODE deleted_node = delete_MIN_MAX_HEAP(foo());
     if(deleted_node.key > find_median()) {
         delete_MIN_HEAP(deleted_node.syncPos);
@@ -544,12 +542,53 @@ int delete_max() {
 }
 
 int delete_median() {
+    if(!MMMQ->median_pq->max_heap->size) return -1;
+
     NODE deleted_node = delete_MAX_HEAP(1);
     delete_MIN_MAX_HEAP(deleted_node.syncPos);
 }
 
 int main() {
     initialize();
+
+    int T;
+    scanf("%d", &T);
+    getchar();
+
+    char str[100];
+    char instruction;
+    int n;
+    for(int i = 0; i < T; i++) {
+        fgets(str, sizeof(str), stdin);
+        int len = strlen(str) - 1;//마지막 문자는 개행 문자이므로
+        
+        if(str[len-1] == 'M') {
+            if(str[0] == 'D') delete_min();
+            else {
+                if(!MMMQ->min_max_pq->size) printf("NULL\n");
+                else printf("%d\n", find_min());
+            }
+        }
+        else if(str[len-1] == 'X') {
+            if(str[0] == 'D') delete_max();
+            else {
+                if(!MMMQ->min_max_pq->size) printf("NULL\n");
+                else printf("%d\n", find_max());
+            }
+        }
+        else if(str[len-1] == 'E') {
+            if(str[0] == 'D') delete_median();
+            else {
+                if(!MMMQ->min_max_pq->size) printf("NULL\n");
+                else printf("%d\n", find_median());
+            }
+        }
+        else {
+            sscanf(str, "%c %d", &instruction, &n);
+            insert(n);
+        }
+    }
+    
     destroy();
 
     return 0;
