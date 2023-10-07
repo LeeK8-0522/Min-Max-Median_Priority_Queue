@@ -617,15 +617,15 @@ int main() {
         else {//fetch operation
             if(str[2] == 'M') {//'F M'
                 if(!MMMQ->min_max_pq->size) printf("NULL\n");//if heap is emty, print "NULL"
-                printf("%d\n", find_min());//print min key
+                else printf("%d\n", find_min());//print min key
             }
             else if(str[2] == 'X') {//'F X'
                 if(!MMMQ->min_max_pq->size) printf("NULL\n");//if heap is emty, print "NULL"
-                printf("%d\n", find_max());//print max key
+                else printf("%d\n", find_max());//print max key
             }
             else {//'F E'
                 if(!MMMQ->min_max_pq->size) printf("NULL\n");//if heap is emty, print "NULL"
-                printf("%d\n", find_median());//print median key
+                else printf("%d\n", find_median());//print median key
             }
         }
     }
