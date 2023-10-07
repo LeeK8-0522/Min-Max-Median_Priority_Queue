@@ -519,14 +519,29 @@ void insert(int element) {
 }
 
 int delete_min() {
+    HEAP* min_heap = MMMQ->median_pq->min_heap;
+    HEAP* max_heap = MMMQ->median_pq->max_heap;
+
     if(!MMMQ->median_pq->max_heap->size) return -1;
 
     NODE deleted_node = delete_MIN_MAX_HEAP(1);
     if(deleted_node.key > find_median()) {
         delete_MIN_HEAP(deleted_node.syncPos);
+        if(max_heap->size >= min_heap->size + 2) {//최대 힙의 노드 개수가 최소 힙의 노드 개수보다 2이상 클 때,
+            NODE temp = delete_MAX_HEAP(1);//최대 힙에서 루트 노드 pop
+            delete_MIN_MAX_HEAP(temp.syncPos);
+            insert_MIN_HEAP(temp.key);//pop한 노드를 최소 힙에 삽입
+            insert_MIN_MAX_HEAP(temp.key);    
+        }
     }
     else {
         delete_MAX_HEAP(deleted_node.syncPos);
+        if(max_heap->size < min_heap->size) {
+            NODE temp = delete_MIN_HEAP(1);//최소 힙에서 루트 노드 pop
+            delete_MIN_MAX_HEAP(temp.syncPos);
+            insert_MAX_HEAP(temp.key);//pop한 노드를 최대 힙에 삽입
+            insert_MIN_MAX_HEAP(temp.key);    
+        }
     }
 }
 
