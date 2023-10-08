@@ -542,18 +542,18 @@ void insert(int element) {//inserts an integer element into the priority queue.
 }
 
 int delete_min() {//deletes and returns the min element
+    if(!MMMQ->min_max_pq->size) return -1;//if heap is empty, do nothing
+    
     HEAP* min_heap = MMMQ->median_pq->min_heap;
     HEAP* max_heap = MMMQ->median_pq->max_heap;
 
-    if(!MMMQ->median_pq->max_heap->size) return -1;
-
-    NODE deleted_node = delete_MIN_MAX_HEAP(1);
-    if(deleted_node.key > find_median()) {
+    NODE deleted_node = delete_MIN_MAX_HEAP(1);//delete root node in min-max heap
+    if(deleted_node.key > find_median()) {//if deleted node is in min heap,
         delete_MIN_HEAP(deleted_node.syncPos);
         
         balance_MEDIAN_HEAP();//balance median heap
     }
-    else {
+    else {//if deleted node is in max heap,
         delete_MAX_HEAP(deleted_node.syncPos);
         
         balance_MEDIAN_HEAP();//balance median heap
