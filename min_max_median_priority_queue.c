@@ -313,31 +313,10 @@ void heapify_down_MIN_MAX_HEAP(int index) {//heapify-down for min-level && max-l
 NODE delete_MIN_MAX_HEAP(int index) {//min-max heap에서 index 노드 삭제 연산
     HEAP* heap = MMMQ->min_max_pq;
 
-    int level = log2_func(index);
-
     swap_node(heap, index, heap->size--);//index 노드와 마지막 노드와 swap
 
-    heapify_down_MIN_MAX_HEAP(index);//index 노드를 root 노드로 하는 sub heap을 heapify
-    
-    //index 노드 upper level에 대한 heapify
-    if(level%2==0) {//for min_level
-        while(index/4 > 0) {//while having grand parent
-            if(heap->nodes[index].key < heap->nodes[index/4].key) {
-                swap_node(heap, index, index/4);//swap with grand parent node
-                index /= 4;
-            }
-            else break;
-        } 
-    }
-    else {//for max_level,
-        while(index/4 > 0) {//while having grand parent
-            if(heap->nodes[index].key > heap->nodes[index/4].key) {
-                swap_node(heap, index, index/4);//swap with grand parent node
-                index /= 4;
-            }
-            else break;
-        } 
-    }
+    heapify_down_MIN_MAX_HEAP(index);//index 노드를 root 노드로 하는 sub heap에 대하여 heapify
+    heapify_up_MIN_MAX_HEAP(index);//index 노드의 upper level에 있는 노드들에 대하여 heapify
 
     return heap->nodes[heap->size + 1];//return deleted node info
 }
